@@ -1,0 +1,623 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+<style>
+    :root {
+        --bg-primary: #000000;
+        --bg-secondary: #111111;
+        --bg-tertiary: #222222;
+        --text-primary: #ffffff;
+        --text-secondary: #aaaaaa;
+        --text-tertiary: #777777;
+        --accent-primary: #ffffff;
+        --accent-secondary: #666666;
+        --border-color: #333333;
+        --pending-color: #ffc107;
+        --processing-color: #3498db;
+        --shipped-color: #9b59b6;
+        --delivered-color: #2ecc71;
+        --cancelled-color: #e74c3c;
+        --shadow-color: rgba(0, 0, 0, 0.4);
+    }
+
+    body, #container {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+    }
+
+    h1, h2, h3, h4, h5 {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .dashboard-container {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .card {
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+        box-shadow: 0 4px 6px var(--shadow-color);
+        padding: 20px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-left: 4px solid transparent;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px var(--shadow-color);
+    }
+
+    .card-title {
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .card-value {
+        color: var(--text-primary);
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .card-subtitle {
+        color: var(--text-tertiary);
+        font-size: 14px;
+    }
+
+    .revenue-card {
+        border-left-color: var(--accent-primary);
+    }
+
+    .orders-card {
+        border-left-color: var(--processing-color);
+    }
+
+    .customers-card {
+        border-left-color: var(--delivered-color);
+    }
+
+    .products-card {
+        border-left-color: var(--pending-color);
+    }
+
+    .section {
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+        box-shadow: 0 4px 6px var(--shadow-color);
+        margin-bottom: 30px;
+        padding: 20px;
+    }
+
+    .section-title {
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pill {
+        border-radius: 50px;
+        color: var(--bg-primary);
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 10px;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background-color: var(--pending-color);
+    }
+
+    .status-processing {
+        background-color: var(--processing-color);
+    }
+
+    .status-shipped {
+        background-color: var(--shipped-color);
+    }
+
+    .status-delivered {
+        background-color: var(--delivered-color);
+    }
+
+    .status-cancelled {
+        background-color: var(--cancelled-color);
+    }
+
+    .progress-container {
+        background-color: var(--bg-tertiary);
+        border-radius: 4px;
+        height: 8px;
+        margin-top: 5px;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .progress-bar {
+        height: 100%;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .dashboard-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .dashboard-table th,
+    .dashboard-table td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 12px 15px;
+        text-align: left;
+    }
+
+    .dashboard-table th {
+        background-color: var(--bg-tertiary);
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    .dashboard-table tr:hover {
+        background-color: var(--bg-tertiary);
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-gap: 20px;
+    }
+
+    @media (max-width: 1024px) {
+        .grid-2 {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .order-status-distribution {
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 0;
+    }
+
+    .status-group {
+        text-align: center;
+        width: 18%;
+    }
+
+    .status-count {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: var(--text-primary);
+    }
+
+    .status-label {
+        color: var(--text-tertiary);
+        font-size: 12px;
+        text-transform: uppercase;
+        margin-top: 5px;
+    }
+
+    /* Link styling */
+    .dashboard-link {
+        color: var(--accent-primary);
+        text-decoration: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .dashboard-link:hover {
+        opacity: 0.8;
+        text-decoration: underline;
+    }
+
+    /* Chart container */
+    .chart-container {
+        height: 300px;
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    /* Customer insights styling */
+    .customer-insight-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .customer-insight-row:last-child {
+        border-bottom: none;
+    }
+
+    .customer-insight-label {
+        color: var(--text-secondary);
+    }
+
+    .customer-insight-value {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .customer-segments {
+        font-size: 16px;
+        margin-top: 20px;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .segment-legend {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+        font-size: 12px;
+        color: var(--text-tertiary);
+    }
+
+    /* Action buttons */
+    .action-button {
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+        padding: 10px 15px;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.2s ease;
+        border: 1px solid var(--border-color);
+    }
+
+    .action-button:hover {
+        background-color: var(--accent-secondary);
+        transform: translateY(-2px);
+    }
+
+    .action-icon {
+        margin-right: 8px;
+        display: inline-block;
+        width: 16px;
+        text-align: center;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>E-commerce Dashboard</h1>
+
+    <!-- Revenue & Orders Stats -->
+    <div class="cards-container">
+        <div class="card revenue-card">
+            <div class="card-title">Total Revenue</div>
+            <div class="card-value">${{ total_revenue|floatformat:2 }}</div>
+            <div class="card-subtitle">Lifetime revenue</div>
+        </div>
+        <div class="card revenue-card">
+            <div class="card-title">Monthly Revenue</div>
+            <div class="card-value">${{ month_revenue|floatformat:2 }}</div>
+            <div class="card-subtitle">Last 30 days</div>
+        </div>
+        <div class="card orders-card">
+            <div class="card-title">Total Orders</div>
+            <div class="card-value">{{ total_orders }}</div>
+            <div class="card-subtitle">All time</div>
+        </div>
+        <div class="card customers-card">
+            <div class="card-title">Customers</div>
+            <div class="card-value">{{ total_customers }}</div>
+            <div class="card-subtitle">{{ customers_with_orders }} with purchases</div>
+        </div>
+        <div class="card products-card">
+            <div class="card-title">Products</div>
+            <div class="card-value">{{ total_products }}</div>
+            <div class="card-subtitle">{{ active_products }} active</div>
+        </div>
+    </div>
+
+    <!-- Order Status Distribution -->
+    <div class="section">
+        <h2 class="section-title">Order Status Distribution</h2>
+        <div class="order-status-distribution">
+            <div class="status-group">
+                <div class="status-count">{{ pending_orders }}</div>
+                <div class="status-pill status-pending">Pending</div>
+                <div class="status-label">Pending</div>
+            </div>
+            <div class="status-group">
+                <div class="status-count">{{ processing_orders }}</div>
+                <div class="status-pill status-processing">Processing</div>
+                <div class="status-label">Processing</div>
+            </div>
+            <div class="status-group">
+                <div class="status-count">{{ shipped_orders }}</div>
+                <div class="status-pill status-shipped">Shipped</div>
+                <div class="status-label">Shipped</div>
+            </div>
+            <div class="status-group">
+                <div class="status-count">{{ delivered_orders }}</div>
+                <div class="status-pill status-delivered">Delivered</div>
+                <div class="status-label">Delivered</div>
+            </div>
+            <div class="status-group">
+                <div class="status-count">{{ cancelled_orders }}</div>
+                <div class="status-pill status-cancelled">Cancelled</div>
+                <div class="status-label">Cancelled</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Tables Grid -->
+    <div class="grid-2">
+        <!-- Sales Chart -->
+        <div class="section">
+            <h2 class="section-title">Revenue Over Time (Last 30 Days)</h2>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Customer Insights -->
+        <div class="section">
+            <h2 class="section-title">Customer Insights</h2>
+            <div>
+                <div class="customer-insight-row">
+                    <div class="customer-insight-label">Total Customers:</div>
+                    <div class="customer-insight-value">{{ total_customers }}</div>
+                </div>
+                <div class="customer-insight-row">
+                    <div class="customer-insight-label">Customers with Orders:</div>
+                    <div class="customer-insight-value">{{ customers_with_orders }} ({{ customers_with_orders|floatformat:1 }}%)</div>
+                </div>
+                <div class="customer-insight-row">
+                    <div class="customer-insight-label">Customers without Orders:</div>
+                    <div class="customer-insight-value">{{ customers_without_orders }} ({{ customers_without_orders|floatformat:1 }}%)</div>
+                </div>
+            </div>
+            <h3 class="customer-segments">Customer Segments</h3>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: {% if total_customers > 0 %}{{ customers_with_orders|floatformat:0 }}{% else %}0{% endif %}%; background-color: var(--delivered-color);"></div>
+            </div>
+            <div class="segment-legend">
+                <div>Converted ({{ customers_with_orders }})</div>
+                <div>Email-only ({{ customers_without_orders }})</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <!-- Recent Orders -->
+        <div class="section">
+            <h2 class="section-title">Recent Orders</h2>
+            <div class="table-responsive">
+                <table class="dashboard-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'admin:api_order_change' order.id %}" class="dashboard-link">
+                                {{ order.id|truncatechars:8 }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if order.customer %}
+                            <a href="{% url 'admin:api_customer_change' order.customer.id %}" class="dashboard-link">
+                                {{ order.customer.email }}
+                            </a>
+                            {% else %}
+                            Guest
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-pill status-{{ order.status }}">{{ order.get_status_display }}</span>
+                        </td>
+                        <td>{{ order.order_date|date:"M d, Y" }}</td>
+                        <td>${{ order.total_amount|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No orders yet</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div style="text-align: right; margin-top: 15px;">
+                <a href="{% url 'admin:api_order_changelist' %}" class="dashboard-link">View all orders →</a>
+            </div>
+        </div>
+
+        <!-- Top Products -->
+        <div class="section">
+            <h2 class="section-title">Top Selling Products</h2>
+            <div class="table-responsive">
+                <table class="dashboard-table">
+                    <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Units Sold</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for product in top_products %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'admin:api_product_change' product.id %}" class="dashboard-link">
+                                {{ product.name }}
+                            </a>
+                        </td>
+                        <td>${{ product.price|floatformat:2 }}</td>
+                        <td>{{ product.units_sold }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">No products sold yet</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div style="text-align: right; margin-top: 15px;">
+                <a href="{% url 'admin:api_product_changelist' %}" class="dashboard-link">View all products →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section">
+        <h2 class="section-title">Quick Actions</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+            <a href="{% url 'admin:api_product_add' %}" class="action-button">
+                <span class="action-icon">+</span>Add Product
+            </a>
+            <a href="{% url 'admin:api_customer_changelist' %}?has_ordered=no" class="action-button">
+                <span class="action-icon">≡</span>View Email-Only Customers
+            </a>
+            <a href="{% url 'admin:api_order_changelist' %}?status=pending" class="action-button">
+                <span class="action-icon">⊙</span>Pending Orders
+            </a>
+            <a href="{% url 'admin:api_address_changelist' %}" class="action-button">
+                <span class="action-icon">⌖</span>Shipping Addresses
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Dark mode chart theme
+        Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
+        Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.1)';
+
+        // Revenue chart
+        const revenueChartEl = document.getElementById('revenueChart');
+        if (revenueChartEl) {
+            const days = {{ chart_days|safe }};
+            const revenue = {{ chart_revenue|safe }};
+            const count = {{ chart_count|safe }};
+
+            new Chart(revenueChartEl, {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [
+                        {
+                            label: 'Revenue ($)',
+                            data: revenue,
+                            borderColor: '#ffffff',
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y-revenue',
+                        },
+                        {
+                            label: 'Orders',
+                            data: count,
+                            borderColor: '#3498db',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            borderDash: [5, 5],
+                            yAxisID: 'y-count',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        'y-revenue': {
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Revenue ($)'
+                            },
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        'y-count': {
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Orders'
+                            },
+                            beginAtZero: true,
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#333333',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.dataset.yAxisID === 'y-revenue') {
+                                        label += '$' + context.parsed.y.toFixed(2);
+                                    } else {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
