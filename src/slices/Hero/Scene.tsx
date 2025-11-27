@@ -11,6 +11,8 @@ import FloatingGrip from "@/components/FloatingGrip";
 import FloatingThrottle from "@/components/FloatingThrottle";
 import { useStore } from "@/hooks/useStore";
 
+const basePath = process.env.NODE_ENV === 'production' ? '/startupengineering' : '';
+
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 type Props = {};
@@ -111,7 +113,7 @@ export default function Scene({}: Props) {
         />
       </group>
 
-      <Environment files="/hdr/lobby.hdr" environmentIntensity={0.6} />
+      <Environment files={`${basePath}/hdr/lobby.hdr`} environmentIntensity={0.6} />
     </group>
   );
 }

@@ -3,14 +3,16 @@
 import { useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 
-useGLTF.preload("/Ashtray.gltf");
+const basePath = process.env.NODE_ENV === 'production' ? '/startupengineering' : '';
+
+useGLTF.preload(`${basePath}/Ashtray.gltf`);
 
 const flavorTextures = {
-  lemonLime: "/labels/Ashtray_Texture.png",
-  grape: "/labels/Ashtray_Texture.png",
-  blackCherry: "/labels/Ashtray_Texture.png",
-  strawberryLemonade: "/labels/Ashtray_Texture.png",
-  watermelon: "/labels/Ashtray_Texture.png",
+  lemonLime: `${basePath}/labels/Ashtray_Texture.png`,
+  grape: `${basePath}/labels/Ashtray_Texture.png`,
+  blackCherry: `${basePath}/labels/Ashtray_Texture.png`,
+  strawberryLemonade: `${basePath}/labels/Ashtray_Texture.png`,
+  watermelon: `${basePath}/labels/Ashtray_Texture.png`,
 };
 
 export type SodaCanProps = {
@@ -23,7 +25,7 @@ export function Ashtray({
                           scale = 1,
                           ...props
                         }: SodaCanProps) {
-  const { nodes, materials } = useGLTF("/Ashtray.gltf");
+  const { nodes, materials } = useGLTF(`${basePath}/Ashtray.gltf`);
   const labels = useTexture(flavorTextures);
 
   // Fix texture flipping

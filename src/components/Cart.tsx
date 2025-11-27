@@ -10,6 +10,8 @@ import { Canvas } from '@react-three/fiber';
 import { Grip } from './Grip';
 import { Throttle } from './Throttle';
 
+const basePath = process.env.NODE_ENV === 'production' ? '/startupengineering' : '';
+
 // Helper to prepare headers with CSRF token
 const prepareHeaders = () => {
   const headers: Record<string, string> = {
@@ -184,7 +186,7 @@ export default function Cart() {
                               <CartItemModel modelType={item.modelType} />
                             </Float>
                           </Center>
-                          <Environment files="/hdr/lobby.hdr" environmentIntensity={0.3} />
+                          <Environment files={`${basePath}/hdr/lobby.hdr`} environmentIntensity={0.3} />
                           <ambientLight intensity={0.5} />
                           <directionalLight intensity={0.8} position={[1, 1, 1]} />
                         </Canvas>

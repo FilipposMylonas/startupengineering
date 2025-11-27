@@ -12,6 +12,8 @@ import { ArrowIcon } from "./ArrowIcon";
 import { WavyCircles } from "./WavyCircles";
 import AddToCart from "@/components/AddToCart";
 
+const basePath = process.env.NODE_ENV === 'production' ? '/startupengineering' : '';
+
 const SPINS_ON_CHANGE = 4;
 
 const PRODUCT_VARIANTS: {
@@ -250,7 +252,7 @@ export default function Carousel(): JSX.Element {
           </Center>
 
           <Environment
-            files="/hdr/lobby.hdr"
+            files={`${basePath}/hdr/lobby.hdr`}
             environmentIntensity={0.2}
             environmentRotation={[0, 3, 0]}
           />

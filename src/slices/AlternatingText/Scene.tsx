@@ -10,6 +10,8 @@ import { useGSAP } from "@gsap/react";
 import FloatingThrottle from "@/components/FloatingThrottle";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
+const basePath = process.env.NODE_ENV === 'production' ? '/startupengineering' : '';
+
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 type Props = {};
@@ -181,7 +183,7 @@ export default function Scene({}: Props) {
         floatingRange={[-0.05, 0.05]}
       />
       <Environment
-        files={"/hdr/lobby.hdr"}
+        files={`${basePath}/hdr/lobby.hdr`}
         environmentIntensity={0.6}
       />
       {/* Add subtle ambient light for better visibility in dark theme */}

@@ -3,10 +3,12 @@
 import { useGLTF } from "@react-three/drei";
 import { useMemo } from "react";
 
-useGLTF.preload("/Throddle.gltf");
+const basePath = process.env.NODE_ENV === 'production' ? '/startupengineering' : '';
+
+useGLTF.preload(`${basePath}/Throddle.gltf`);
 
 export function Throttle(props: any) {
-  const { scene } = useGLTF("/Throddle.gltf");
+  const { scene } = useGLTF(`${basePath}/Throddle.gltf`);
   
   // Clone the scene to ensure each instance is unique
   const clonedScene = useMemo(() => scene.clone(), [scene]);

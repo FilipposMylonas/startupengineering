@@ -3,10 +3,12 @@
 import { useGLTF } from "@react-three/drei";
 import { useMemo } from "react";
 
-useGLTF.preload("/Grip.gltf");
+const basePath = process.env.NODE_ENV === 'production' ? '/startupengineering' : '';
+
+useGLTF.preload(`${basePath}/Grip.gltf`);
 
 export function Grip(props: any) {
-  const { scene } = useGLTF("/Grip.gltf");
+  const { scene } = useGLTF(`${basePath}/Grip.gltf`);
   
   // Clone the scene to ensure each instance is unique
   const clonedScene = useMemo(() => scene.clone(), [scene]);

@@ -11,6 +11,8 @@ import { useFrame } from "@react-three/fiber";
 import FloatingGrip from "@/components/FloatingGrip";
 import FloatingThrottle from "@/components/FloatingThrottle";
 
+const basePath = process.env.NODE_ENV === 'production' ? '/startupengineering' : '';
+
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 type FlavorType = {
@@ -231,7 +233,7 @@ export default function Scene({ sentence, flavor, isDesktop = true }: SceneProps
 
       {/* Lights */}
       <ambientLight intensity={0.5} color="#cbd5e1" />
-      <Environment files="/hdr/lobby.hdr" environmentIntensity={0.6} />
+      <Environment files={`${basePath}/hdr/lobby.hdr`} environmentIntensity={0.6} />
     </group>
   );
 }
@@ -257,7 +259,7 @@ function ThreeText({
       scale={scale}
       color={color}
       material={material}
-      font="/fonts/Alpino-Variable.woff"
+      font={`${basePath}/fonts/Alpino-Variable.woff`}
       fontWeight={900}
       anchorX="center"
       anchorY="middle"
