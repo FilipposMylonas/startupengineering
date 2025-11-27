@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useCart } from '@/hooks/useCart';
 import { ShoppingCart, Check, Plus, Minus } from 'lucide-react';
 
+const basePath = process.env.NODE_ENV === 'production' ? '/startupengineering' : '';
+
 type AddToCartProps = {
   productId: string; // This will be the actual numerical DB ID passed as a string
   name: string;
@@ -32,7 +34,7 @@ export default function AddToCart({ productId, name, price, variant, image, mode
       price,
       quantity,
       variant: variant, // Use the variant prop passed from Carousel
-      image: image || `/images/StartupEngineeringLogo.png`, // Use passed image or default
+      image: image || `${basePath}/images/StartupEngineeringLogo.png`, // Use passed image or default
       modelType: modelType, // Type of 3D model to show in cart
     });
 

@@ -36,6 +36,9 @@ const isClient = typeof window !== 'undefined';
 // Get API URL based on environment
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';  // Default to relative URL for production
 
+// Disable backend sync for static deployments (GitHub Pages)
+const DISABLE_BACKEND = process.env.NODE_ENV === 'production';
+
 // Cookie options for different environments
 const getCookieOptions = () => {
   return {
@@ -103,7 +106,7 @@ export const useCart = create<CartState>()(
       toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
       
       syncWithBackend: async () => {
-        if (!isClient) return;
+        if (!isClient || DISABLE_BACKEND) return;
         
         try {
           set({ isLoading: true });
@@ -191,7 +194,9 @@ export const useCart = create<CartState>()(
           set({ items: [...currentItems, item] });
         }
         
-        // Then sync with backend
+        // Then sync with backend (skip if disabled)
+        if (DISABLE_BACKEND) return;
+        
         try {
           // Ensure product_id is a valid number by extracting only digits
           // This handles both cases: when it's a numeric ID or a composite string
@@ -256,6 +261,9 @@ export const useCart = create<CartState>()(
           items: state.items.filter((item) => item.id !== id),
         }));
         
+        // Skip backend sync if disabled
+        if (DISABLE_BACKEND) return;
+        
         // Then update backend
         try {
           // Ensure product_id is a valid number by extracting only digits if needed
@@ -304,6 +312,9 @@ export const useCart = create<CartState>()(
           ),
         }));
         
+        // Skip backend sync if disabled
+        if (DISABLE_BACKEND) return;
+        
         // Then update backend
         try {
           // Ensure product_id is a valid number by extracting only digits if needed
@@ -348,6 +359,9 @@ export const useCart = create<CartState>()(
       clearCart: async () => {
         // Update local state first
         set({ items: [] });
+        
+        // Skip backend sync if disabled
+        if (DISABLE_BACKEND) return;
         
         // Then update backend
         try {
